@@ -1,5 +1,5 @@
 # LumitySpeaker
-Bot I made in less than 24 hours for my friend and I.
+Bot I made in less than 24 hours for my friend and I. Translates lumity speak from <a href="https://en.wikipedia.org/wiki/The_Owl_House">The Owl House</a> to english.
 
 # How to use
 Install the bot using this <a href="https://discord.com/oauth2/authorize?client_id=1436831494768300253">link</a> for discord. I should be hosting this bot, but if not then you can make another version and run that instead.
