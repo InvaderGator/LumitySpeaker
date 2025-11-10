@@ -121,33 +121,33 @@ async def translate(ctx: discord.ApplicationContext, message: str):
     isToEnglish = False
 
     #ALL MESSAGES NEED TO BE LOWERCASE. TRANSLATION IS CASE SENSITIVE WITHOUT THIS CHECK
-    message.lower()
+    lowerMessage = message.lower()
 
     for x in emojis:
-        if(message.startswith(x)):
+        if(lowerMessage.startswith(x)):
             isToEnglish = True
 
     if(isToEnglish):
-        newMessage=message.translate(transEnglish)
+        newMessage=lowerMessage.translate(transEnglish)
     else:
-        newMessage=message.translate(trans)
+        newMessage=lowerMessage.translate(trans)
 
     await ctx.respond(newMessage)
 
 #WHEN USER SPECIFICALLY TRANSLATES TO LUMITY SPEAK
 @client.slash_command(name="translatetolumity", description="Translate Lumity to English!", integration_types={discord.IntegrationType.user_install})
 async def translatetolumity(ctx: discord.ApplicationContext, message: str):
-    message.lower()
+    lowerMessage = message.lower()
 
-    newMessage=message.translate(trans)
+    newMessage=lowerMessage.translate(trans)
     await ctx.respond(newMessage)
 
 #WHEN USER SPECIFICALLY TRANSLATES TO ENGLISH LETTERING
 @client.slash_command(name="translatetoenglish", description="Translate English to Lumity!", integration_types={discord.IntegrationType.user_install})
 async def translatetoenglish(ctx: discord.ApplicationContext, message: str):
-    message.lower()
+    lowerMessage = message.lower()
 
-    newMessage = message.translate(transEnglish)
+    newMessage = lowerMessage.translate(transEnglish)
     await ctx.respond(newMessage)
 
 #WHEN USER WANTS TO SEE THE DICTIONARY
