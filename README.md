@@ -8,6 +8,8 @@ Install the bot using this <a href="https://discord.com/oauth2/authorize?client_
 
 ### **/github** brings you to this page. This is to view the source code and commands more in detail.
 
+### **/invite** discord invite for the bot to add to user, or server.
+
 ### **/translate** translate a message from lumity speak or english lettering.
 The way **/translate** works is that it reads the *first* letter of the message.
 *It checks the **first** word for an emoji, and translates it to english if so, and vice-versa*
