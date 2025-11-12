@@ -1,237 +1,188 @@
-# bot.py
-import os
+#IMPORT REQUIREMENTS
 import discord
-import json
+import os
 from dotenv import load_dotenv
 
-#load private things
+#LOADS ENV FILE
 load_dotenv()
-TOKEN = os.getenv("DISCORD_TOKEN")
 
-#set discord intents
-intents = discord.Intents.default()
-intents.members = True
+#CREATES CLIENT CLASS
+client = discord.Bot()
 
-#initialize client
-#initally built on discord.py, switched to py-cord
-client = discord.Bot(intents=intents)
+#DICTIONARY FOR LUMITY SPEAK
+lumityDict = {
+    "a": "🦇",
+    "b": "⛰",
+    "c": "🦀",
+    "d": "😭",
+    "e": "🎹",
+    "f": "📊",
+    "g": "🍤",
+    "h": "🌴",
+    "i": "⛔",
+    "j": "🦈",
+    "k": "✂",
+    "l": "✔",
+    "m": "🌜",
+    "n": "🐍",
+    "o": "🌞",
+    "p": "🧢",
+    "q": "🍀",
+    "r": "📈",
+    "s": "⚡",
+    "t": "☂",
+    "u": "↩",
+    "v": "🥢",
+    "w": "🌛",
+    "x": "⚔",
+    "y": "🌂",
+    "z": "🧬",
+    "!": "❗",
+    "?": "❓",
+}
 
-#when bot starts or on_ready is called
+#DICTIONARY FOR ENGLISH LETTERS
+englishDict = {
+    "🦇": "a",
+    "⛰": "b",
+    "🦀": "c",
+    "😭": "d",
+    "🎹": "e",
+    "📊": "f",
+    "🍤": "g",
+    "🌴": "h",
+    "⛔": "i",
+    "🦈": "j",
+    "✂": "k",
+    "✔": "l",
+    "🌜": "m",
+    "🐍": "n",
+    "🌞": "o",
+    "🧢": "p",
+    "🍀": "q",
+    "📈": "r",
+    "⚡": "s",
+    "☂": "t",
+    "↩": "u",
+    "🥢": "v",
+    "🌛": "w",
+    "⚔": "x",
+    "🌂": "y",
+    "🧬": "z",
+    "❗": "!",
+    "❓": "?",
+}
+
+#TRANSLATION TABLES
+trans = str.maketrans(lumityDict)
+transEnglish = str.maketrans(englishDict)
+
+#EMOJI ARRAY FOR COMPARISON
+emojis = [
+    "🦇", "⛰️", "🦀", "😭", "🎹", "📊", "🍤", "🌴", "⛔", "🦈",
+    "✂️", "✔️", "🌜", "🐍", "🌞", "🧢", "🍀", "📈", "⚡", "☂️",
+    "↩️", "🥢", "🌛", "⚔️", "🌂", "🧬", "❗", "❓",
+]
+
+#LETTER ARRAY FOR COMPARISON
+letters = [
+    "a", "b", "c", "d", "e", "f", "g", "h", "i", "j",
+    "k", "l", "m", "n", "o", "p", "q", "r", "s", "t",
+    "u", "v", "w", "x", "y", "z", "!", "?"
+]
+
+#DETERMINES FORMATING FOR DICTIONARY
+#SCARY, I DON'T LIKE IT.
+#NUMBERS OF LETTERS AND EMOJIS NEED TO BE EVEN FOR THIS TO WORK
+dictionaryList = []
+dictionaryListCounter = 0
+while(len(emojis)-1 > dictionaryListCounter):
+    emoji = emojis[dictionaryListCounter]
+    emoji2 = emojis[dictionaryListCounter + 1]
+    letter = letters[dictionaryListCounter]
+    letter2 = letters[dictionaryListCounter + 1]
+    dictionaryList.append(emoji + "  |  " + letter + "                        " + emoji2 + "  |  " + letter2)
+    dictionaryListCounter += 2
+
+#WHEN BOT CONNECTS AND IS READY
 @client.event
 async def on_ready():
-    # Base channels
-    client.admin = client.get_user(int(os.getenv("ADMIN_ID")))
-    client.gatorLog = client.get_channel(int(os.getenv("GATOR_LOG")))
-    client.privateChannel = client.get_channel(int(os.getenv("PRIVATE")))
+    print(f"{client.user} is ready and online!")
 
-    #channels that are stored in env
-    #different from successChannels
-    client.channels = []
+#Thank you to toothyfernsan on the py-cord discord.
+#I would've cried if i needed to reprogram this thing in another launguage to get dm channels working
+#WHEN SOMEONE TRANSLATES A MESSAGE WITHOUT SPECIFICATION FOR ENGLISH OR LUMITY
+@client.slash_command(name="translate", description="Translate a message!", integration_types={discord.IntegrationType.user_install})
+async def translate(ctx: discord.ApplicationContext, message: str, isprivate: bool):
+    #BOOLEAN FOR ENGLISH OR LUMITY TRANSLATION
+    #DECIDES BASED ON IF IT STARTS WITH AN EMOJI OR NOT
+    isToEnglish = False
 
-    client.gatorTesting = client.get_channel(int(os.getenv("GATOR_TESTING1")))
-    client.channels.append(client.gatorTesting)
+    #ALL MESSAGES NEED TO BE LOWERCASE. TRANSLATION IS CASE SENSITIVE WITHOUT THIS CHECK
+    lowerMessage = message.lower()
 
-    client.gatorTesting2 = client.get_channel(int(os.getenv("GATOR_TESTING2")))
-    client.channels.append(client.gatorTesting2)
+    for x in emojis:
+        if(lowerMessage.startswith(x)):
+            isToEnglish = True
 
-    client.a1Bottle = client.get_channel(int(os.getenv("A1_BOTTLE")))
-    client.channels.append(client.a1Bottle)
-
-    client.fags = client.get_channel(int(os.getenv("FAGS")))
-    client.channels.append(client.fags)
-
-    #for print statements and if logic
-    successChannels = []
-
-    #opens banlist
-    with open('banlist.json', 'r') as file:
-        client.bannedUsers = json.load(file)
-
-    #gets array of banned users
-    bannedUserNames = []
-    for x in client.bannedUsers:
-        #gets names of banned users for printing
-        bannedUserNames.append(client.get_user(x).name)
-
-    #formats and sends banned user messages in gatorLog
-    formattedBanList = "\n".join(bannedUserNames)
-    banListMessage = '# *Users Banned:*\n>>> {}'.format(formattedBanList)
-    await client.gatorLog.send(banListMessage)
-    print("BANNED USERS:" + str(client.bannedUsers))
-
-
-    #all of these are if a station set or not.
-    #
-    if (client.gatorLog == None):
-        print("Log not set!")
-        # if this doesn't load, doesn't matter much anyway.
+    if(isToEnglish):
+        newMessage=lowerMessage.translate(transEnglish)
     else:
-        print("Log set!")
-        successChannels.append("### SUCCESS: Log Set! ✅")
-    #
+        newMessage=lowerMessage.translate(trans)
 
-    #
-    if(client.admin == None):
-        print("Admin not set!")
-        await client.gatorLog.send("## FAIL: Admin Not Set ❌")
-    else:
-        print("Admin set!")
-        successChannels.append("### SUCCESS: Admin Set! ✅")
-    #
+    await ctx.respond(newMessage, ephemeral=isprivate)
 
-    #counter is for seeing if there are channels not set, and if there are, then how many channels aren't set
-    counter = 0
-    for x in client.channels:
-        #needs to be string
-        #easier to do variable
-        xStr = str(x)
+#WHEN USER SPECIFICALLY TRANSLATES TO LUMITY SPEAK
+@client.slash_command(name="translatetolumity", description="Translate Lumity to English!", integration_types={discord.IntegrationType.user_install})
+async def translatetolumity(ctx: discord.ApplicationContext, message: str, isprivate: bool):
+    lowerMessage = message.lower()
 
-        if(x == None):
-            counter += 1
-        else:
-            print(xStr + " set!")
-            successChannels.append("### SUCCESS: " + xStr + " Set! ✅")
+    newMessage=lowerMessage.translate(trans)
+    await ctx.respond(newMessage, ephemeral=isprivate)
 
-    #if counter is not 0, then print which channels are set, so you can use process of elimination to figure out which did not.
-    if(counter != 0):
-        counterStr = str(counter)
-        print("FAIL: Channels not set: " + counterStr + " ❌")
-        await client.gatorLog.send("FAIL: Channels not set: " + counterStr + " ❌")
+#WHEN USER SPECIFICALLY TRANSLATES TO ENGLISH LETTERING
+@client.slash_command(name="translatetoenglish", description="Translate English to Lumity!", integration_types={discord.IntegrationType.user_install})
+async def translatetoenglish(ctx: discord.ApplicationContext, message: str, isprivate: bool):
+    lowerMessage = message.lower()
 
-        channelsStr = []
-        for x in client.channels:
-            channelsStr.append(str(x))
-        print(list(enumerate(channelsStr)))
-        await client.gatorLog.send(list(enumerate(channelsStr)))
+    newMessage = lowerMessage.translate(transEnglish)
+    await ctx.respond(newMessage, ephemeral=isprivate)
 
-        for x in client.channels:
-            if x == None:
-                client.channels.remove(x)
+#WHEN USER WANTS TO SEE THE DICTIONARY
+#MY FRIEND AND I DECIDED SOME LETTERING OURSELVES SINCE THERE IS NO UNIFIED VERSION OF LUMITY SPEAK
+@client.slash_command(name="dictionary", description="View dictionary!", integration_types={discord.IntegrationType.user_install})
+async def dictionary(ctx: discord.ApplicationContext):
+    #FORMATING FOR MESSAGING
+    formattedMessage = '\n'.join(dictionaryList)
+    newMessage = "*Dictionary!*\n>>> {}".format(formattedMessage)
+    await ctx.respond(newMessage)
 
-    #formats and sends message
-    formattedMessage = '\n'.join(successChannels)
-    newMessage = '# *Channels Set:*\n>>> {}'.format(formattedMessage)
-    await client.gatorLog.send(newMessage)
+#WHEN USER WANTS TO VIEW GITHUB PAGE
+@client.slash_command(name="github", description="View source code and instructions.", integration_types={discord.IntegrationType.user_install})
+async def github(ctx: discord.ApplicationContext):
+    await ctx.respond("https://github.com/InvaderGator/LumitySpeaker")
 
-#i must dm the bot to send messages to channels
-#for private dms, gets rerouted to private channel.
-@client.event
-async def on_message(message):
-    for x in client.channels:
-        if message.author == client.admin and isinstance(message.channel, discord.DMChannel):
-            if message.attachments:
-                for y in message.attachments:
-                    messageImage = y.url
-                    await x.send(messageImage)
-                    if (message.content != ""):
-                        await x.send(message.content)
-            else:
-                await x.send(message.content)
+#WHEN USER WANTS TO VIEW COMMANDS AND USES OF COMMANDS
+@client.slash_command(name="help", description="Get commands and use the bot!", integration_types={discord.IntegrationType.user_install})
+async def help(ctx: discord.ApplicationContext):
+    commands = [
+        "***/help*** | For this command menu.",
+        "***/github*** | Sends github link.",
+        "***/invite*** | Sends invite link.",
+        "***/translate*** | Translate a generic message.",
+        "***/translatetolumity*** | Translate letters into Lumity.",
+        "***/translatetoenglish*** | Translate Lumity into letters.",
+        "***/dictionary*** | View dictionary."
+    ]
+    #JOINS ARRAYS FOR FORMATTING
+    formattedMessage = '\n'.join(commands)
+    newMessage = '*Welcome! View github for more context!*\n>>> {}'.format(formattedMessage)
 
-    banned = False
-    userID = message.author.id
-    for x in client.bannedUsers:
-        int1 = int(x)
-        int2 = int(userID)
+    await ctx.respond(newMessage)
 
-        if(int1 == int2):
-            banned = True
+@client.slash_command(name="invite", description="Get invite link!", integration_types={discord.IntegrationType.user_install})
+async def invite(ctx: discord.ApplicationContext):
+    await ctx.respond("https://discord.com/oauth2/authorize?client_id=1436831494768300253")
 
-    if not message.author == client.admin and not banned and isinstance(message.channel, discord.DMChannel):
-        if message.attachments:
-            for y in message.attachments:
-                messageImage = y.url
-                await client.privateChannel.send("*" + message.author.name + "*" + "SENT" + messageImage)
-                if (message.content != ""):
-                    await client.privateChannel.send("*" + message.author.name + " says...* " "'" + "**" + message.content + "**")
-        else:
-            await client.privateChannel.send("*" + message.author.name + " says...* " "'" + "**" + message.content + "**")
-        print(message.author.name + " says... " + "'" + message.content + "'")
-
-@client.slash_command(name="reload", description="Reload the channels.")
-async def reload(ctx: discord.ApplicationContext):
-    if(ctx.author == client.admin):
-        await ctx.respond("Reloaded!")
-        await on_ready()
-    else:
-        await ctx.respond("Please contact InvaderGator to reload channels.")
-
-@client.slash_command(name="say", description="Say something to the bot!")
-async def say(ctx: discord.ApplicationContext, message: str):
-    banned = False
-    userID = ctx.author.id
-    for x in client.bannedUsers:
-        int1 = int(x)
-        int2 = int(userID)
-
-        if(int1 == int2):
-            banned = True
-
-    if not banned and client.sayLock != True:
-        for x in client.channels:
-            await x.send("-# *" + ctx.author.name + "*: " + message)
-        await ctx.respond("Message sent.", ephemeral=True)
-    else:
-        await ctx.respond("Ur banned, loser.", ephemeral=True)
-
-@client.slash_command(name="adminlock", description="locks say command.")
-async def adminlock(ctx: discord.ApplicationContext):
-    if(ctx.author == client.admin):
-        client.sayLock = True
-        await ctx.respond("Say command locked.")
-
-@client.slash_command(name="adminunlock", description="unlocks say command.")
-async def adminunlock(ctx: discord.ApplicationContext):
-    if(ctx.author == client.admin):
-        client.sayLock = True
-        await ctx.respond("Say command unlocked.")
-
-@client.slash_command(name="adminban", description="DEATH.")
-async def adminban(ctx: discord.ApplicationContext, message: str):
-    newMessageArray = []
-
-    for x in message:
-        if(not(x == "<" or x == ">" or x == "@")):
-            newMessageArray.append(x)
-
-    newMessage = "".join(newMessageArray)
-    user = client.get_user(int(newMessage))
-
-    if(ctx.author == client.admin):
-        client.bannedUsers.append(int(newMessage))
-        json.dump(client.bannedUsers, open("banlist.json", "w"))
-        await ctx.respond("User, " + user.mention + " banned from saybot command!")
-        await user.send("User, " + user.name  + ", have been banned from gator messenger! Please contact @invadergator to get unbanned.")
-        await on_ready()
-
-@client.slash_command(name="adminunban", description="life. (:")
-async def adminunban(ctx: discord.ApplicationContext, message: str):
-    newMessageArray = []
-    newMessage = ""
-
-    for x in message:
-        if(not(x == "<" or x == ">" or x == "@")):
-            newMessageArray.append(x)
-
-    newMessage = "".join(newMessageArray)
-    user = client.get_user(int(newMessage))
-
-    if(ctx.author == client.admin):
-        newMessageArray = []
-        for x in client.bannedUsers:
-
-            int1 = int(x)
-            int2 = int(newMessage)
-            print(x)
-            print(newMessage)
-
-            if(int1 != int2):
-                print("TRIGGER")
-                newMessageArray.append(x)
-        client.bannedUsers = newMessageArray
-
-        json.dump(client.bannedUsers, open("banlist.json", "w"))
-        await ctx.respond("User, " + user.mention + " unbanned from saybot command!")
-        await on_ready()
-
-client.run(TOKEN)
+#RUNS BOT
+client.run(os.getenv('DISCORD_TOKEN'))
