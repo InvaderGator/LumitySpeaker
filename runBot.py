@@ -1,6 +1,4 @@
 #IMPORT REQUIREMENTS
-from unittest import doModuleCleanups
-
 import discord
 import os
 from dotenv import load_dotenv
@@ -115,7 +113,7 @@ async def on_ready():
 #I would've cried if i needed to reprogram this thing in another launguage to get dm channels working
 #WHEN SOMEONE TRANSLATES A MESSAGE WITHOUT SPECIFICATION FOR ENGLISH OR LUMITY
 @client.slash_command(name="translate", description="Translate a message!", integration_types={discord.IntegrationType.user_install})
-async def translate(ctx: discord.ApplicationContext, message: str):
+async def translate(ctx: discord.ApplicationContext, message: str, isprivate: bool):
     #BOOLEAN FOR ENGLISH OR LUMITY TRANSLATION
     #DECIDES BASED ON IF IT STARTS WITH AN EMOJI OR NOT
     isToEnglish = False
@@ -132,23 +130,23 @@ async def translate(ctx: discord.ApplicationContext, message: str):
     else:
         newMessage=lowerMessage.translate(trans)
 
-    await ctx.respond(newMessage)
+    await ctx.respond(newMessage, ephemeral=isprivate)
 
 #WHEN USER SPECIFICALLY TRANSLATES TO LUMITY SPEAK
 @client.slash_command(name="translatetolumity", description="Translate Lumity to English!", integration_types={discord.IntegrationType.user_install})
-async def translatetolumity(ctx: discord.ApplicationContext, message: str):
+async def translatetolumity(ctx: discord.ApplicationContext, message: str, isprivate: bool):
     lowerMessage = message.lower()
 
     newMessage=lowerMessage.translate(trans)
-    await ctx.respond(newMessage)
+    await ctx.respond(newMessage, ephemeral=isprivate)
 
 #WHEN USER SPECIFICALLY TRANSLATES TO ENGLISH LETTERING
 @client.slash_command(name="translatetoenglish", description="Translate English to Lumity!", integration_types={discord.IntegrationType.user_install})
-async def translatetoenglish(ctx: discord.ApplicationContext, message: str):
+async def translatetoenglish(ctx: discord.ApplicationContext, message: str, isprivate: bool):
     lowerMessage = message.lower()
 
     newMessage = lowerMessage.translate(transEnglish)
-    await ctx.respond(newMessage)
+    await ctx.respond(newMessage, ephemeral=isprivate)
 
 #WHEN USER WANTS TO SEE THE DICTIONARY
 #MY FRIEND AND I DECIDED SOME LETTERING OURSELVES SINCE THERE IS NO UNIFIED VERSION OF LUMITY SPEAK
