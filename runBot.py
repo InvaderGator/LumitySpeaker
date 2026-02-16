@@ -116,7 +116,7 @@ async def on_ready():
 async def translate(
         ctx: discord.ApplicationContext,
         message: discord.Option(str, description="Message to translate."),
-        isprivate: discord.Option(bool, description="If message is private or not. Default is false.")
+        isprivate: discord.Option(bool, description="If message is private or not. Default is false.", default=False)
 ):
     #BOOLEAN FOR ENGLISH OR LUMITY TRANSLATION
     #DECIDES BASED ON IF IT STARTS WITH AN EMOJI OR NOT
@@ -200,3 +200,4 @@ async def help(ctx: discord.ApplicationContext):
 #RUNS BOT
 
 client.run(os.getenv('DISCORD_TOKEN'))
+
