@@ -113,7 +113,11 @@ async def on_ready():
 #I would've cried if i needed to reprogram this thing in another launguage to get dm channels working
 #WHEN SOMEONE TRANSLATES A MESSAGE WITHOUT SPECIFICATION FOR ENGLISH OR LUMITY
 @client.slash_command(name="translate", description="Translate a message!", integration_types={discord.IntegrationType.user_install})
-async def translate(ctx: discord.ApplicationContext, message: str, isprivate: bool):
+async def translate(
+        ctx: discord.ApplicationContext,
+        message: discord.Option(str, description="Message to translate."),
+        isprivate: discord.Option(bool, description="If message is private or not. Default is false.")
+):
     #BOOLEAN FOR ENGLISH OR LUMITY TRANSLATION
     #DECIDES BASED ON IF IT STARTS WITH AN EMOJI OR NOT
     isToEnglish = False
@@ -134,7 +138,11 @@ async def translate(ctx: discord.ApplicationContext, message: str, isprivate: bo
 
 #WHEN USER SPECIFICALLY TRANSLATES TO LUMITY SPEAK
 @client.slash_command(name="translatetolumity", description="Translate Lumity to English!", integration_types={discord.IntegrationType.user_install})
-async def translatetolumity(ctx: discord.ApplicationContext, message: str, isprivate: bool):
+async def translatetolumity(
+        ctx: discord.ApplicationContext,
+        message: discord.Option(str, description="Message to translate."),
+        isprivate: discord.Option(bool, description="If the message is private. Default is no.", default=False)
+):
     lowerMessage = message.lower()
 
     newMessage=lowerMessage.translate(trans)
@@ -142,7 +150,11 @@ async def translatetolumity(ctx: discord.ApplicationContext, message: str, ispri
 
 #WHEN USER SPECIFICALLY TRANSLATES TO ENGLISH LETTERING
 @client.slash_command(name="translatetoenglish", description="Translate English to Lumity!", integration_types={discord.IntegrationType.user_install})
-async def translatetoenglish(ctx: discord.ApplicationContext, message: str, isprivate: bool):
+async def translatetoenglish(
+        ctx: discord.ApplicationContext,
+        message: discord.Option(str, decription="Message you want translated."),
+        isprivate: discord.Option(bool, description="If the translation is private or not. Default is false.", default=False)
+):
     lowerMessage = message.lower()
 
     newMessage = lowerMessage.translate(transEnglish)
@@ -151,16 +163,21 @@ async def translatetoenglish(ctx: discord.ApplicationContext, message: str, ispr
 #WHEN USER WANTS TO SEE THE DICTIONARY
 #MY FRIEND AND I DECIDED SOME LETTERING OURSELVES SINCE THERE IS NO UNIFIED VERSION OF LUMITY SPEAK
 @client.slash_command(name="dictionary", description="View dictionary!", integration_types={discord.IntegrationType.user_install})
-async def dictionary(ctx: discord.ApplicationContext):
+async def dictionary(
+        ctx: discord.ApplicationContext,
+        isprivate = discord.Option(bool, description="If the dictionary is private. Default is false.", default=False)
+):
+
     #FORMATING FOR MESSAGING
     formattedMessage = '\n'.join(dictionaryList)
     newMessage = "*Dictionary!*\n>>> {}".format(formattedMessage)
-    await ctx.respond(newMessage)
+
+    await ctx.respond(newMessage, ehemeral=isprivate)
 
 #WHEN USER WANTS TO VIEW GITHUB PAGE
 @client.slash_command(name="github", description="View source code and instructions.", integration_types={discord.IntegrationType.user_install})
 async def github(ctx: discord.ApplicationContext):
-    await ctx.respond("https://github.com/InvaderGator/LumitySpeaker")
+    await ctx.respond("https://github.com/InvaderGator/LumitySpeaker", ephemeral=True)
 
 #WHEN USER WANTS TO VIEW COMMANDS AND USES OF COMMANDS
 @client.slash_command(name="help", description="Get commands and use the bot!", integration_types={discord.IntegrationType.user_install})
@@ -176,13 +193,9 @@ async def help(ctx: discord.ApplicationContext):
     ]
     #JOINS ARRAYS FOR FORMATTING
     formattedMessage = '\n'.join(commands)
-    newMessage = '*Welcome! View github for more context!*\n>>> {}'.format(formattedMessage)
+    newMessage = '*Welcome! View github for more context!*\n>>> {}'.format(formattedMessage, ephemeral=True)
 
     await ctx.respond(newMessage)
-
-@client.slash_command(name="invite", description="Get invite link!", integration_types={discord.IntegrationType.user_install})
-async def invite(ctx: discord.ApplicationContext):
-    await ctx.respond("https://discord.com/oauth2/authorize?client_id=1436831494768300253")
 
 #RUNS BOT
 client.run(os.getenv('DISCORD_TOKEN'))
