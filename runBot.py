@@ -172,7 +172,7 @@ async def dictionary(
     formattedMessage = '\n'.join(dictionaryList)
     newMessage = "*Dictionary!*\n>>> {}".format(formattedMessage)
 
-    await ctx.respond(newMessage, ehemeral=isprivate)
+    await ctx.respond(newMessage, ephemeral=isprivate)
 
 #WHEN USER WANTS TO VIEW GITHUB PAGE
 @client.slash_command(name="github", description="View source code and instructions.", integration_types={discord.IntegrationType.user_install})
@@ -198,4 +198,5 @@ async def help(ctx: discord.ApplicationContext):
     await ctx.respond(newMessage)
 
 #RUNS BOT
+
 client.run(os.getenv('DISCORD_TOKEN'))
